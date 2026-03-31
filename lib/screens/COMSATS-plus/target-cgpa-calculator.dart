@@ -1,0 +1,202 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../controllers/comsats_plus_controller.dart';
+
+class TargetCGPAcalculator extends StatelessWidget {
+  final CGPAcalculatorController cgpaController = Get.put(
+    CGPAcalculatorController(),
+  );
+
+  final TextEditingController preCreditsController = TextEditingController();
+
+  final TextEditingController preCgpaController = TextEditingController();
+
+  final TextEditingController currCreditsController = TextEditingController();
+
+  final TextEditingController targetCgpaController = TextEditingController();
+
+  double result = 0.0;
+
+  void calculate() {
+    try {
+      double preCredits = double.parse(preCreditsController.text.trim());
+      double preCgpa = double.parse(preCgpaController.text.trim());
+      double currCredits = double.parse(currCreditsController.text.trim());
+      double targetCgpa = double.parse(targetCgpaController.text.trim());
+
+      if (preCgpa > 4 || targetCgpa > 4) {
+        Get.snackbar(
+          'Wrong Information',
+          'CGPA should be less than 4',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent.withOpacity(0.8),
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (preCgpa < 0 || targetCgpa < 0 || preCredits < 0 || currCredits < 0) {
+        Get.snackbar(
+          'Wrong Information',
+          'Credit hours and CGPA cannot be negative.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent.withOpacity(0.8),
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      double totalCredits = preCredits + currCredits;
+
+      double targetQualityPoints = targetCgpa * totalCredits;
+      double previousQualityPoints = preCgpa * preCredits;
+
+      cgpaController.calcRequiredGPA(
+        targetQualityPoints,
+        previousQualityPoints,
+        currCredits,
+      );
+
+      if (cgpaController.requiredGPA > 4) {
+        Get.snackbar(
+          'Not possible',
+          'Target CGPA not achievable in one semester.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orangeAccent.withOpacity(0.8),
+          colorText: Colors.white,
+        );
+        return;
+      }
+    } catch (e) {
+      print(e);
+      Get.snackbar(
+        'Wrong Information',
+        'Please fill all the fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  bool validatefields() {
+    final text1 = preCreditsController.text.trim();
+    final text2 = preCgpaController.text.trim();
+    final text3 = currCreditsController.text.trim();
+    final text4 = targetCgpaController.text.trim();
+
+    if (text1.isEmpty || text2.isEmpty || text3.isEmpty || text4.isEmpty) {
+      Get.snackbar(
+        'Missing Information',
+        'Please fill all the fields',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('GPA Planning Calculator'),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildtextfield(
+                  label: 'Previous Credits',
+                  controller: preCreditsController,
+                ),
+                _buildtextfield(
+                  label: 'Current CGPA',
+                  controller: preCgpaController,
+                ),
+                _buildtextfield(
+                  label: 'Remaining Credits',
+                  controller: currCreditsController,
+                ),
+                _buildtextfield(
+                  label: 'Target CGPA',
+                  controller: targetCgpaController,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (validatefields()) {
+                      calculate();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF06B6D4),
+                  ),
+                  child: Text('Calculate'),
+                ),
+                SizedBox(height: 40),
+                Obx(
+                  () => TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: cgpaController.requiredGPA / 4),
+                    duration: Duration(milliseconds: 700),
+                    builder: (context, value, child) {
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: CircularProgressIndicator(
+                              value: value,
+                              strokeWidth: 6,
+                              backgroundColor: Colors.grey.shade300,
+                              color: Color(0xFF06B6D4),
+                            ),
+                          ),
+                          Text(
+                            cgpaController.requiredGPA.toStringAsFixed(2),
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF06B6D4),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildtextfield({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        cursorColor: Color(0xFF06B6D4),
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.white),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+    );
+  }
+}
