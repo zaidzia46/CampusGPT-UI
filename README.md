@@ -21,6 +21,7 @@ iOS, Web, or Desktop support has **not been configured yet** and may be added in
 - Query and response interaction
 - Feedback option for incorrect answers
 - Integration with backend API
+- Multiple GPA calculators for different purposes (e.g., semester GPA, cumulative GPA, and other academic calculations)
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
