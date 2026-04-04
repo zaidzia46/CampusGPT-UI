@@ -93,6 +93,7 @@ class _SemesterGPAcalculatorState extends State<SemesterGPAcalculator> {
         totalCredits += credit;
       }
       controller.calculateGPA(totalQualityPoints, totalCredits);
+      FocusScope.of(context).unfocus();
     } catch (e) {
       Get.snackbar(
         'Wrong Information',

@@ -204,6 +204,7 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
       }
 
       controller.calculateTotalMarks(theoryMarks);
+      FocusScope.of(context).unfocus();
     } catch (e) {
       Get.snackbar(
         'Wrong Information',

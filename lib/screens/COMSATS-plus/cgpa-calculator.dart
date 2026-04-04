@@ -18,7 +18,7 @@ class CGPAcalculator extends StatelessWidget {
 
   double result = 0.0;
 
-  void calculate() {
+  void calculate(BuildContext context) {
     try {
       double preCredits = double.parse(preCreditsController.text.trim());
       double currCgpa = double.parse(currCgpaController.text.trim());
@@ -50,6 +50,7 @@ class CGPAcalculator extends StatelessWidget {
       double add1 = (preCredits * currCgpa) + (currCredits * currGpa);
       double add2 = preCredits + currCredits;
       cgpaController.calcgpa(add1, add2);
+      FocusScope.of(context).unfocus();
     } catch (e) {
       print(e);
       Get.snackbar(
@@ -112,7 +113,7 @@ class CGPAcalculator extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     if (validatefields()) {
-                      calculate();
+                      calculate(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
