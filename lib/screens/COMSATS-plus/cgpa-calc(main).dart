@@ -98,6 +98,7 @@ class CGPAcalc extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     subtitle,
+                    textAlign: TextAlign.justify,
                     style: TextStyle(
                       fontSize: 12,
                       color: const Color(0xFFCBD5E1),
@@ -108,6 +109,7 @@ class CGPAcalc extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(width: 13),
             const Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),
