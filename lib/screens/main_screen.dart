@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Color(0xFF7C3AED),
+              color: Color(0xFF06B6D4),
               // gradient: LinearGradient(
               //   colors: [Color(0xFF7C3AED), Color(0xFF03788c)],
               //   begin: Alignment.topLeft,
@@ -74,7 +74,7 @@ class _MainScreenState extends State<MainScreen> {
                 const CircleAvatar(
                   radius: 32,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.school, size: 40, color: Color(0xFF7C3AED)),
+                  child: Icon(Icons.school, size: 40, color: Color(0xFF06B6D4)),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -146,12 +146,12 @@ class _MainScreenState extends State<MainScreen> {
     return ListTile(
       leading: Icon(
         icon,
-        color: isSelected ? Color(0xFF9d6ef0) : Colors.white70,
+        color: isSelected ? Color(0xFF06B6D4) : Colors.white70,
       ),
       title: Text(
         title,
         style: GoogleFonts.inter(
-          color: isSelected ? Color(0xFF9d6ef0) : Colors.white70,
+          color: isSelected ? Color(0xFF06B6D4) : Colors.white70,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           fontSize: 15,
         ),

@@ -17,6 +17,7 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenState extends State<SplashScreen> {
   static const String ONBOARDKEY = 'onboarding_key';
   static const String KEYLOGIN = 'login_key';
+  static bool keyboardOPEN = true;
 
   @override
   void initState() {

@@ -163,6 +163,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:demo_chatbot/api_conn/dio.dart';
 import 'package:demo_chatbot/widgets/starry_background.dart';
+import 'splash_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -195,8 +196,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _focusNode = FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+      if (mounted && SplashScreenState.keyboardOPEN) {
         _focusNode.requestFocus();
+        SplashScreenState.keyboardOPEN = false;
       }
     });
 
@@ -312,7 +314,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: message.isUser
-                              ? const Color(0xFF7C3AED)
+                              ? const Color(0xFF06B6D4)
                               : const Color(0xFF1E293B),
                           borderRadius: BorderRadius.circular(12),
                           border: message.isUser
@@ -354,106 +356,128 @@ class _ChatScreenState extends State<ChatScreen> {
                                       message.isDisliked.value = false;
                                       showModalBottomSheet(
                                         context: context,
+                                        isScrollControlled: true, // important
                                         builder: (context) {
                                           return Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Column(
-                                              children: [
-                                                SizedBox(height: 20),
-                                                DropdownMenu<String>(
-                                                  width: double.infinity,
-                                                  hintText: "Select reason",
-                                                  initialSelection:
+                                            padding: EdgeInsets.only(
+                                              left: 8,
+                                              right: 8,
+                                              top: 8,
+                                              bottom: MediaQuery.of(context)
+                                                  .viewInsets
+                                                  .bottom, // moves with keyboard
+                                            ),
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize
+                                                    .min, // important
+                                                children: [
+                                                  SizedBox(height: 20),
+
+                                                  DropdownMenu<String>(
+                                                    width: double.infinity,
+                                                    hintText: "Select reason",
+                                                    initialSelection:
+                                                        queryFeedbackController
+                                                            .selectedReason
+                                                            .value
+                                                            .isEmpty
+                                                        ? null
+                                                        : queryFeedbackController
+                                                              .selectedReason
+                                                              .value,
+                                                    dropdownMenuEntries:
+                                                        queryFeedbackController
+                                                            .reasons
+                                                            .map(
+                                                              (item) =>
+                                                                  DropdownMenuEntry(
+                                                                    value: item,
+                                                                    label: item,
+                                                                  ),
+                                                            )
+                                                            .toList(),
+                                                    onSelected: (value) {
                                                       queryFeedbackController
                                                           .selectedReason
-                                                          .value
-                                                          .isEmpty
-                                                      ? null
-                                                      : queryFeedbackController
-                                                            .selectedReason
-                                                            .value,
-                                                  dropdownMenuEntries:
-                                                      queryFeedbackController
-                                                          .reasons
-                                                          .map(
-                                                            (item) =>
-                                                                DropdownMenuEntry(
-                                                                  value: item,
-                                                                  label: item,
-                                                                ),
-                                                          )
-                                                          .toList(),
-                                                  onSelected: (value) {
-                                                    queryFeedbackController
-                                                        .selectedReason
-                                                        .value = value
-                                                        .toString();
-                                                  },
-                                                ),
-                                                SizedBox(height: 20),
-                                                TextField(
-                                                  controller:
-                                                      queryFeedbackMessageController,
-                                                  cursorColor: Color(
-                                                    0xFF06B6D4,
+                                                          .value = value
+                                                          .toString();
+                                                    },
                                                   ),
-                                                  maxLines: 5,
-                                                  decoration: InputDecoration(
-                                                    hintText:
-                                                        'Share details (optional)',
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10,
-                                                          ),
+
+                                                  SizedBox(height: 20),
+
+                                                  TextField(
+                                                    controller:
+                                                        queryFeedbackMessageController,
+                                                    cursorColor: Color(
+                                                      0xFF06B6D4,
+                                                    ),
+                                                    maxLines: 5,
+                                                    decoration: InputDecoration(
+                                                      hintText:
+                                                          'Share details (optional)',
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(height: 5),
-                                                Text(
-                                                  'Your conservation will be included with your feedback to help improve our services.',
-                                                  style: TextStyle(
-                                                    fontSize: 10,
+
+                                                  SizedBox(height: 5),
+
+                                                  Text(
+                                                    'Your conservation will be included with your feedback to help improve our services.',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                    ),
                                                   ),
-                                                ),
-                                                Spacer(),
-                                                Obx(
-                                                  () => ElevatedButton(
-                                                    onPressed:
-                                                        queryFeedbackController
-                                                                .selectedReason
-                                                                .value !=
-                                                            ''
-                                                        ? () {
-                                                            sendQueryFeedback(
-                                                              query,
-                                                              chatController
-                                                                  .llmresponse,
-                                                              queryFeedbackController
+
+                                                  SizedBox(height: 20),
+
+                                                  Obx(
+                                                    () => ElevatedButton(
+                                                      onPressed:
+                                                          queryFeedbackController
                                                                   .selectedReason
-                                                                  .value,
-                                                              queryFeedbackMessageController
-                                                                  .text,
-                                                            );
-                                                            queryFeedbackMessageController
-                                                                .clear();
-                                                            queryFeedbackController
+                                                                  .value !=
+                                                              ''
+                                                          ? () {
+                                                              sendQueryFeedback(
+                                                                query,
+                                                                chatController
+                                                                    .llmresponse,
+                                                                queryFeedbackController
                                                                     .selectedReason
-                                                                    .value =
-                                                                '';
-                                                            Get.back();
-                                                          }
-                                                        : null,
-                                                    style:
-                                                        ElevatedButton.styleFrom(
-                                                          backgroundColor:
-                                                              Color(0xFF06B6D4),
-                                                        ),
-                                                    child: Text('Submit'),
+                                                                    .value,
+                                                                queryFeedbackMessageController
+                                                                    .text,
+                                                              );
+                                                              queryFeedbackMessageController
+                                                                  .clear();
+                                                              queryFeedbackController
+                                                                      .selectedReason
+                                                                      .value =
+                                                                  '';
+                                                              Get.back();
+                                                            }
+                                                          : null,
+                                                      style:
+                                                          ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                Color(
+                                                                  0xFF06B6D4,
+                                                                ),
+                                                          ),
+                                                      child: Text('Submit'),
+                                                    ),
                                                   ),
-                                                ),
-                                                SizedBox(height: 10),
-                                              ],
+
+                                                  SizedBox(height: 20),
+                                                ],
+                                              ),
                                             ),
                                           );
                                         },

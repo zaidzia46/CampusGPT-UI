@@ -65,9 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       authController.isLoadingForLogin.value = false;
       Get.offAll(() => const MainScreen());
-
-      print("STATUS CODE: ${response.statusCode}");
-      print("RESPONSE DATA: ${response.data}");
     } on DioException catch (e) {
       await Future.delayed(Duration(seconds: 1));
       authController.isLoadingForLogin.value = false;
@@ -325,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF06B6D4),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        fixedSize: Size(double.infinity, 40),
+                        fixedSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -749,7 +746,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF06B6D4),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        fixedSize: Size(double.infinity, 40),
+                        fixedSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
