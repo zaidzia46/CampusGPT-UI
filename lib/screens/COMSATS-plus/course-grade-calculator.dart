@@ -20,6 +20,30 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
   final TextEditingController labFinalController = TextEditingController();
   final TextEditingController labFinalTotalController = TextEditingController();
 
+  bool MarksChecker(obtained, total) {
+    if (obtained > total) {
+      Get.snackbar(
+        'Wrong Information',
+        'Obtained marks cannot be greater than total marks',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      return false;
+    }
+    if (obtained < 0 || total < 0) {
+      Get.snackbar(
+        'Wrong Information',
+        'Marks cannot be negative',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      return false;
+    }
+    return true;
+  }
+
   void calculateGrade(
     List<Quiz> quizzes,
     List<QuizTotal> quizzesTotal,
@@ -49,26 +73,7 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
         }
         double quizObtained = double.parse(quizzes[i].controller.text.trim());
         double quizTotal = double.parse(quizzesTotal[i].controller.text.trim());
-        if (quizObtained > quizTotal) {
-          Get.snackbar(
-            'Wrong Information',
-            'Quiz marks cannot be greater than total marks',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
-            colorText: Colors.white,
-          );
-          return;
-        }
-        if (quizObtained < 0 || quizTotal < 0) {
-          Get.snackbar(
-            'Wrong Information',
-            'Marks cannot be negative',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
-            colorText: Colors.white,
-          );
-          return;
-        }
+        if (!MarksChecker(quizObtained, quizTotal)) return;
         quizObtainedTotal += quizObtained;
         quizTotalsTotal += quizTotal;
       }
@@ -95,26 +100,7 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
         double assignTotal = double.parse(
           assignmentsTotal[i].controller.text.trim(),
         );
-        if (assignObtained > assignTotal) {
-          Get.snackbar(
-            'Wrong Information',
-            'Assignment marks cannot be greater than total marks',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
-            colorText: Colors.white,
-          );
-          return;
-        }
-        if (assignObtained < 0 || assignTotal < 0) {
-          Get.snackbar(
-            'Wrong Information',
-            'Marks cannot be negative',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
-            colorText: Colors.white,
-          );
-          return;
-        }
+        if (!MarksChecker(assignObtained, assignTotal)) return;
         assignObtainedTotal += assignObtained;
         assignTotalsTotal += assignTotal;
       }
@@ -126,8 +112,10 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
       //calculation of theory marks
       double midterm = double.parse(midController.text.trim());
       double midtermTotal = double.parse(midTotalController.text.trim());
+      if (!MarksChecker(midterm, midtermTotal)) return;
       double finalterm = double.parse(finalController.text.trim());
       double finaltermTotal = double.parse(finalTotalController.text.trim());
+      if (!MarksChecker(finalterm, finaltermTotal)) return;
 
       midterm = (midterm / midtermTotal) * 0.25 * 100;
       finalterm = (finalterm / finaltermTotal) * 0.50 * 100;
@@ -160,26 +148,7 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
           double labAssignTotal = double.parse(
             labAssignmentsTotal[i].controller.text.trim(),
           );
-          if (labAssignObtained > labAssignTotal) {
-            Get.snackbar(
-              'Wrong Information',
-              'Assignment marks cannot be greater than total marks',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.redAccent.withOpacity(0.8),
-              colorText: Colors.white,
-            );
-            return;
-          }
-          if (labAssignObtained < 0 || labAssignTotal < 0) {
-            Get.snackbar(
-              'Wrong Information',
-              'Marks cannot be negative',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.redAccent.withOpacity(0.8),
-              colorText: Colors.white,
-            );
-            return;
-          }
+          if (!MarksChecker(labAssignObtained, labAssignTotal)) return;
           labAssignObtainedTotal += labAssignObtained;
           labAssignTotalsTotal += labAssignTotal;
         }
@@ -190,19 +159,22 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
 
         double labMid = double.parse(labMidController.text.trim());
         double labMidTotal = double.parse(labMidTotalController.text.trim());
+        if (!MarksChecker(labMid, labMidTotal)) return;
+
         double labFinal = double.parse(labFinalController.text.trim());
         double labFinalTotal = double.parse(
           labFinalTotalController.text.trim(),
         );
+        if (!MarksChecker(labFinal, labFinalTotal)) return;
 
         labMid = (labMid / labMidTotal) * 0.25 * 100;
         labFinal = (labFinal / labFinalTotal) * 0.50 * 100;
 
         labMarks = labMid + labFinal + controller.labAssignmentResult.value;
         controller.calculateTotalMarksWithLab(theoryMarks, labMarks);
+        FocusScope.of(context).unfocus();
         return;
       }
-
       controller.calculateTotalMarks(theoryMarks);
       FocusScope.of(context).unfocus();
     } catch (e) {
@@ -647,12 +619,14 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
                         () => CircularWidget(
                           number: controller.GPA.value,
                           text: 'GPA',
+                          total: 4.00,
                         ),
                       ),
                       Obx(
                         () => CircularWidget(
                           number: controller.totalMarks.value,
                           text: 'Marks',
+                          total: 100.00,
                         ),
                       ),
                     ],
@@ -661,6 +635,10 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
                   ElevatedButton(
                     onPressed: () {
                       if (validatefields()) {
+                        print(
+                          "controller.totalMarks.value: ${controller.totalMarks.value}",
+                        );
+                        print("controller.GPA.value: ${controller.GPA.value}");
                         calculateGrade(
                           controller.quizzes,
                           controller.quizzesTotal,
@@ -707,15 +685,21 @@ class _CourseGradeCalculatorState extends State<CourseGradeCalculator> {
 }
 
 class CircularWidget extends StatelessWidget {
-  const CircularWidget({super.key, required this.number, required this.text});
+  const CircularWidget({
+    super.key,
+    required this.number,
+    required this.text,
+    required this.total,
+  });
 
   final double number;
   final String text;
+  final dynamic total;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: number / 4.00),
+      tween: Tween(begin: 0, end: number / total),
       duration: Duration(milliseconds: 700),
       builder: (context, value, child) {
         return Stack(
