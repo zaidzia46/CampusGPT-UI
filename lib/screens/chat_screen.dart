@@ -163,6 +163,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:demo_chatbot/api_conn/dio.dart';
 import 'package:demo_chatbot/widgets/starry_background.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:lottie/lottie.dart';
 import 'splash_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -192,6 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _clearHistory();
     _scrollController = ScrollController();
     _focusNode = FocusNode();
 
@@ -225,6 +228,26 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     });
+  }
+
+  // Save chat
+  Future<int?> saveChat(String query, String response) async {
+    final res = await APIClient.dio.post(
+      '/student/saved-chats',
+      data: {"query": query, "response": response},
+    );
+    if (res.statusCode == 200) {
+      return res.data['saved_id'];
+    }
+    return null;
+  }
+
+  Future<void> unsaveChat(int savedId) async {
+    await APIClient.dio.delete('/student/saved-chats/$savedId');
+  }
+
+  Future<void> _clearHistory() async {
+    await APIClient.dio.delete('/student/clear-history');
   }
 
   Future<void> sendQueryFeedback(
@@ -304,33 +327,53 @@ class _ChatScreenState extends State<ChatScreen> {
                         ? CrossAxisAlignment.end
                         : CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        margin: message.isUser
-                            ? const EdgeInsets.only(left: 20, top: 8, bottom: 8)
-                            : const EdgeInsets.only(right: 20, top: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: message.isUser
-                              ? const Color(0xFF06B6D4)
-                              : const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(12),
-                          border: message.isUser
-                              ? null
-                              : Border.all(color: const Color(0xFF334155)),
-                        ),
-                        child: Text(
-                          message.text,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'p-m-font',
+                      if (!message.isLoading)
+                        Container(
+                          margin: message.isUser
+                              ? const EdgeInsets.only(
+                                  left: 20,
+                                  top: 8,
+                                  bottom: 8,
+                                )
+                              : const EdgeInsets.only(right: 20, top: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: message.isUser
+                                ? const Color(0xFF06B6D4)
+                                : const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(12),
+                            border: message.isUser
+                                ? null
+                                : Border.all(color: const Color(0xFF334155)),
+                          ),
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'p-m-font',
+                            ),
                           ),
                         ),
-                      ),
-                      !message.isUser && index != 0
+
+                      // Show Lottie OUTSIDE container when loading
+                      if (message.isLoading && !message.isUser && index != 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Lottie.asset(
+                              'assets/animation/sparkle_loader.json',
+                              width: 100,
+                              height: 70,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      !message.isUser && index != 0 && !message.isLoading
                           ? Row(
                               children: [
                                 Obx(
@@ -497,6 +540,47 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(width: 5),
+                                Obx(
+                                  () => IconButton(
+                                    onPressed: () async {
+                                      if (message.isSaved.value) {
+                                        await unsaveChat(message.savedId!);
+                                        message.isSaved.value = false;
+                                        message.savedId = null;
+                                      } else {
+                                        // Save
+                                        final savedId = await saveChat(
+                                          message.query,
+                                          message.response,
+                                        );
+                                        if (savedId != null) {
+                                          message.isSaved.value = true;
+                                          message.savedId = savedId;
+                                        }
+                                      }
+
+                                      Fluttertoast.showToast(
+                                        msg: message.isSaved.value
+                                            ? "Chat saved successfully"
+                                            : "Chat unsaved successfully",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        backgroundColor: Color(0xFF06B6D4),
+                                        textColor: Colors.white,
+                                        fontSize: 16.0,
+                                        webBgColor: "#06B6D4",
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.bookmark_sharp,
+                                      size: 18,
+                                      color: message.isSaved.value
+                                          ? Colors.white
+                                          : Color(0xFF334155),
+                                    ),
+                                  ),
+                                ),
                               ],
                             )
                           : SizedBox(),
@@ -532,7 +616,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     onSubmitted: (text) {
                       if (text.trim().isNotEmpty) {
                         chatController.sendMessage(text.trim());
-                        query = text.trim();
                         messageController.clear();
                       }
                     },
@@ -545,6 +628,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () {
                     if (messageController.text.isNotEmpty) {
                       chatController.sendMessage(messageController.text);
+                      query = messageController.text;
+                      print(
+                        '-------------------------DEBUG: ${query}----------------------------------',
+                      );
                       messageController.clear();
                       _scrollToBottom();
                     }
