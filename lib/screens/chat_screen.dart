@@ -1,175 +1,11 @@
-// import 'package:demo_chatbot/widgets/starry_background.dart';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import '../controllers/chat_controller.dart';
-//
-// class ChatScreen extends StatefulWidget {
-//   const ChatScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   State<ChatScreen> createState() => _ChatScreenState();
-// }
-//
-// class _ChatScreenState extends State<ChatScreen> {
-//   final ChatController chatController = Get.put(ChatController());
-//   final TextEditingController messageController = TextEditingController();
-//   late ScrollController _scrollController;
-//   late FocusNode _focusNode;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _scrollController = ScrollController();
-//     _focusNode = FocusNode();
-//
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       if (mounted) {
-//         _focusNode.requestFocus();
-//       }
-//     });
-//
-//     chatController.messages.listen((_) {
-//       _scrollToBottom();
-//     });
-//   }
-//
-//   @override
-//   void dispose() {
-//     _scrollController.dispose();
-//     _focusNode.dispose();
-//     messageController.dispose();
-//     super.dispose();
-//   }
-//
-//   void _scrollToBottom() {
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       if (_scrollController.hasClients && mounted) {
-//         _scrollController.animateTo(
-//           _scrollController.position.maxScrollExtent,
-//           duration: const Duration(milliseconds: 300),
-//           curve: Curves.easeOut,
-//         );
-//       }
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       resizeToAvoidBottomInset: false,
-//       backgroundColor: Colors.transparent,
-//       appBar: AppBar(title: const Text('AI Campus Assistant'), elevation: 0),
-//       body: SafeArea(child: StarryBackground(child: chat_body(context))),
-//     );
-//   }
-//
-//   Column chat_body(BuildContext context) {
-//     return Column(
-//       children: [
-//         Expanded(
-//           child: Obx(() {
-//             return ListView.builder(
-//               controller: _scrollController,
-//               padding: const EdgeInsets.all(16),
-//               itemCount: chatController.messages.length,
-//               itemBuilder: (context, index) {
-//                 final message = chatController.messages[index];
-//                 return Align(
-//                   alignment: message.isUser
-//                       ? Alignment.centerRight
-//                       : Alignment.centerLeft,
-//                   child: Container(
-//                     margin: const EdgeInsets.symmetric(vertical: 8),
-//                     padding: const EdgeInsets.symmetric(
-//                       horizontal: 16,
-//                       vertical: 12,
-//                     ),
-//                     decoration: BoxDecoration(
-//                       color: message.isUser
-//                           ? const Color(0xFF7C3AED)
-//                           : const Color(0xFF1E293B),
-//                       borderRadius: BorderRadius.circular(12),
-//                       border: message.isUser
-//                           ? null
-//                           : Border.all(color: const Color(0xFF334155)),
-//                     ),
-//                     child: Text(
-//                       message.text,
-//                       style: GoogleFonts.inter(
-//                         color: Colors.white,
-//                         fontSize: 14,
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             );
-//           }),
-//         ),
-//         SingleChildScrollView(
-//           child: Padding(
-//             padding: EdgeInsets.fromLTRB(
-//               16,
-//               16,
-//               16,
-//               16 + MediaQuery.of(context).viewInsets.bottom,
-//             ),
-//             child: Row(
-//               children: [
-//                 Expanded(
-//                   child: TextField(
-//                     controller: messageController,
-//                     focusNode: _focusNode,
-//                     cursorColor: const Color(0xFF06B6D4),
-//                     style: const TextStyle(color: Colors.white),
-//                     textInputAction: TextInputAction
-//                         .send, // 👈 enables keyboard "Send" button
-//                     decoration: const InputDecoration(
-//                       hintText: 'Ask me anything...',
-//                       hintStyle: TextStyle(color: Colors.white54),
-//                       border: InputBorder.none,
-//                     ),
-//                     onSubmitted: (text) {
-//                       if (text.trim().isNotEmpty) {
-//                         chatController.sendMessage(text.trim());
-//                         messageController.clear();
-//                       }
-//                     },
-//                   ),
-//                 ),
-//                 const SizedBox(width: 8),
-//                 FloatingActionButton(
-//                   mini: true,
-//                   backgroundColor: const Color(0xFF06B6D4),
-//                   onPressed: () {
-//                     if (messageController.text.isNotEmpty) {
-//                       chatController.sendMessage(messageController.text);
-//                       messageController.clear();
-//                       _scrollToBottom();
-//                     }
-//                   },
-//                   child: const Icon(Icons.send),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:demo_chatbot/api_conn/dio.dart';
-import 'package:demo_chatbot/widgets/starry_background.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 import 'splash_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../controllers/chat_controller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -194,7 +30,6 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _clearHistory();
     _scrollController = ScrollController();
     _focusNode = FocusNode();
 
@@ -244,10 +79,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> unsaveChat(int savedId) async {
     await APIClient.dio.delete('/student/saved-chats/$savedId');
-  }
-
-  Future<void> _clearHistory() async {
-    await APIClient.dio.delete('/student/clear-history');
   }
 
   Future<void> sendQueryFeedback(
@@ -565,7 +396,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             ? "Chat saved successfully"
                                             : "Chat unsaved successfully",
                                         toastLength: Toast.LENGTH_SHORT,
-                                        gravity: ToastGravity.BOTTOM,
+                                        gravity: ToastGravity.TOP_LEFT,
                                         backgroundColor: Color(0xFF06B6D4),
                                         textColor: Colors.white,
                                         fontSize: 16.0,

@@ -6,6 +6,7 @@ import '../widgets/starry_background.dart';
 import 'onboarding_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:demo_chatbot/api_conn/dio.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,7 +23,12 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _clearHistory();
     wheretogo();
+  }
+
+  Future<void> _clearHistory() async {
+    await APIClient.dio.delete('/student/clear-history');
   }
 
   Future<void> wheretogo() async {

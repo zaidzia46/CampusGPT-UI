@@ -73,4 +73,22 @@ class APIClient {
       return null;
     }
   }
+
+  static Future<List<dynamic>> getNotifications() async {
+    final res = await dio.get('/student/notifications');
+    return res.data;
+  }
+
+  static Future<int> getUnreadCount() async {
+    final res = await dio.get('/student/notifications/unread-count');
+    return res.data['unread_count'];
+  }
+
+  static Future<void> markAsRead(int notificationId) async {
+    await dio.patch('/student/notifications/$notificationId/read');
+  }
+
+  static Future<void> markAllRead() async {
+    await dio.patch('/student/notifications/mark-all-read');
+  }
 }

@@ -1,13 +1,19 @@
+import 'dart:async';
+
 import 'package:demo_chatbot/controllers/settings_controller.dart';
+import 'package:demo_chatbot/screens/saved_chats.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../api_conn/dio.dart';
+import '../controllers/notification_controller.dart';
 import '../widgets/starry_background.dart';
 import 'COMSATS-plus/cgpa-calc(main).dart';
 import 'chat_screen.dart';
 import 'events_screen.dart';
 import 'faqs_screen.dart';
+import 'notifications_screen.dart';
 import 'settings/feedback_screen.dart';
 import 'login_screen.dart';
 import 'settings_screen.dart';
@@ -21,10 +27,14 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final SettingsController settingsController = Get.put(SettingsController());
+  final NotificationController notifController = Get.put(
+    NotificationController(),
+  );
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
     const ChatScreen(),
+    const SavedChats(),
     const CGPAcalc(),
     const FAQsScreen(),
     const SettingsScreen(),
@@ -32,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<String> _screenTitles = [
     'CampusGPT',
+    'Saved Chats',
     'COMSATS Plus',
     'FAQs',
     'Settings',
@@ -48,6 +59,67 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => Scaffold(
+                        extendBody: true,
+                        appBar: AppBar(
+                          title: const Text('Notifications'),
+                          elevation: 0,
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                        ),
+                        body: StarryBackground(
+                          child: NotificationsScreen(
+                            onAllRead: () => notifController.resetCount(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                  notifController.loadUnreadCount();
+                },
+              ),
+
+              // ← Obx replaces setState here
+              Obx(
+                () => notifController.unreadCount.value > 0
+                    ? Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            notifController.unreadCount.value > 99
+                                ? '99+'
+                                : '${notifController.unreadCount.value}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -59,14 +131,7 @@ class _MainScreenState extends State<MainScreen> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFF06B6D4),
-              // gradient: LinearGradient(
-              //   colors: [Color(0xFF7C3AED), Color(0xFF03788c)],
-              //   begin: Alignment.topLeft,
-              //   end: Alignment.bottomRight,
-              // ),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF06B6D4)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -99,21 +164,27 @@ class _MainScreenState extends State<MainScreen> {
             context: context,
           ),
           _buildDrawerItem(
+            icon: Icons.bookmarks_sharp,
+            title: 'Saved Chats',
+            index: 1,
+            context: context,
+          ),
+          _buildDrawerItem(
             icon: Icons.feed_outlined,
             title: 'COMSATS Plus',
-            index: 1,
+            index: 2,
             context: context,
           ),
           _buildDrawerItem(
             icon: Icons.help,
             title: 'Frequently Asked Question',
-            index: 2,
+            index: 3,
             context: context,
           ),
           _buildDrawerItem(
             icon: Icons.settings,
             title: 'Settings',
-            index: 3,
+            index: 4,
             context: context,
           ),
           const Divider(color: Colors.white10),
