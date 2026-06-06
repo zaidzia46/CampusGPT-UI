@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api_conn/dio.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/settings_controller.dart';
 import '../widgets/starry_background.dart';
 import 'main_screen.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -59,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await APIClient.storage.write(key: 'access_token', value: accessToken);
       await APIClient.storage.write(key: 'refresh_token', value: refreshToken);
+          await Get.put(SettingsController()).loadUserRole();
       authController.login(
         emailController.text.trim(),
         passwordController.text.trim(),

@@ -36,12 +36,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final bool isFaculty = settingsController.userRole.value == 'faculty';
+      final int settingsIndex = isFaculty ? 5 : 4;
       final List<Widget> _screens = [
         const ChatScreen(),
         const SavedChats(),
         const CGPAcalc(),
         const FAQsScreen(),
-        if (settingsController.userRole == 'faculty') const SubmitInfoScreen(),
+        if (isFaculty) const SubmitInfoScreen(),
         const SettingsScreen(),
       ];
 
@@ -50,16 +52,18 @@ class _MainScreenState extends State<MainScreen> {
         'Saved Chats',
         'COMSATS Plus',
         'FAQs',
-        'Submit Information',
+        if (isFaculty) 'Submit Information',
         'Settings',
       ];
+
+      final int activeIndex = _selectedIndex.clamp(0, _screens.length - 1);
 
       return Scaffold(
         extendBody: true,
         drawer: _buildDrawer(context),
-        body: StarryBackground(child: _screens[_selectedIndex]),
+        body: StarryBackground(child: _screens[activeIndex]),
         appBar: AppBar(
-          title: Text(_screenTitles[_selectedIndex]),
+          title: Text(_screenTitles[activeIndex]),
           elevation: 0,
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
@@ -130,6 +134,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Drawer _buildDrawer(BuildContext context) {
+    final bool isFaculty = settingsController.userRole.value == 'faculty';
+    final int settingsIndex = isFaculty ? 5 : 4;
+
     return Drawer(
       backgroundColor: const Color(0xFF0F172A),
       child: ListView(
@@ -186,21 +193,17 @@ class _MainScreenState extends State<MainScreen> {
             index: 3,
             context: context,
           ),
-          // in _buildDrawer(), add after FAQs item
-          Obx(
-            () => settingsController.userRole.value == 'faculty'
-                ? _buildDrawerItem(
-                    icon: Icons.upload_file_outlined,
-                    title: 'Submit Information',
-                    index: 4,
-                    context: context,
-                  )
-                : const SizedBox(),
-          ),
+          if (settingsController.userRole.value == 'faculty')
+            _buildDrawerItem(
+              icon: Icons.upload_file_outlined,
+              title: 'Submit Information',
+              index: 4,
+              context: context,
+            ),
           _buildDrawerItem(
             icon: Icons.settings,
             title: 'Settings',
-            index: 5,
+            index: settingsIndex,
             context: context,
           ),
           const Divider(color: Colors.white10),
