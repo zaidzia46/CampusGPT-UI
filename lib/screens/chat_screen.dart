@@ -6,6 +6,8 @@ import 'splash_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/chat_controller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -180,13 +182,35 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ? null
                                 : Border.all(color: const Color(0xFF334155)),
                           ),
-                          child: Text(
-                            message.text,
+                          child: Linkify(
+                            text: message.text,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors
+                                  .white, // match your existing text color
                               fontSize: 14,
                               fontFamily: 'p-m-font',
                             ),
+                            linkStyle: TextStyle(
+                              color: Color(
+                                0xFF06B6D4,
+                              ), // cyan — matches your app theme
+                              fontSize: 14,
+                              fontFamily: 'p-m-font',
+                              decoration: TextDecoration.underline,
+                              decorationColor: Color(
+                                0xFF06B6D4,
+                              ), // ← same cyan or any color you want
+                              decorationThickness: 1.5,
+                            ),
+                            onOpen: (link) async {
+                              final uri = Uri.parse(link.url);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(
+                                  uri,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              }
+                            },
                           ),
                         ),
 
