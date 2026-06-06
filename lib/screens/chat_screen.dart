@@ -197,10 +197,22 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Lottie.asset(
-                              'assets/animation/sparkle_loader.json',
-                              width: 100,
-                              height: 70,
+                              'assets/animation/loader3.json',
+                              width: 120,
+                              height: 90,
                               fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const SizedBox(
+                                  width: 100,
+                                  height: 70,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF06B6D4),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),

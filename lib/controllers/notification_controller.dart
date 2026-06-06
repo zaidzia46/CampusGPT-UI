@@ -11,7 +11,7 @@ class NotificationController extends GetxController {
     super.onInit();
     loadUnreadCount();
     _timer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(minutes: 5),
       (_) => loadUnreadCount(),
     );
   }

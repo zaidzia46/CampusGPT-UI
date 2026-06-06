@@ -12,7 +12,7 @@ class APIClient {
   static final Dio dio =
       Dio(
           BaseOptions(
-            baseUrl: 'http://127.0.0.1:8000',
+            baseUrl: 'http://192.168.100.12:8000',
             headers: {'Content-Type': 'application/json'},
           ),
         )
@@ -58,7 +58,7 @@ class APIClient {
     final refresh_token = await storage.read(key: 'refresh_token');
     try {
       final response = await Dio().post(
-        'http://127.0.0.1:8000/refresh',
+        'http://192.168.100.12:8000/refresh',
         data: jsonEncode(refresh_token),
       );
 
@@ -90,5 +90,10 @@ class APIClient {
 
   static Future<void> markAllRead() async {
     await dio.patch('/student/notifications/mark-all-read');
+  }
+
+  static Future<List<dynamic>> getMySubmissions() async {
+    final res = await dio.get('/student/faculty/my-submissions');
+    return res.data;
   }
 }

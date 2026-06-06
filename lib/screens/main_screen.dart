@@ -10,6 +10,7 @@ import '../api_conn/dio.dart';
 import '../controllers/notification_controller.dart';
 import '../widgets/starry_background.dart';
 import 'COMSATS-plus/cgpa-calc(main).dart';
+import 'SubmitInfoScreen.dart';
 import 'chat_screen.dart';
 import 'events_screen.dart';
 import 'faqs_screen.dart';
@@ -32,96 +33,100 @@ class _MainScreenState extends State<MainScreen> {
   );
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const ChatScreen(),
-    const SavedChats(),
-    const CGPAcalc(),
-    const FAQsScreen(),
-    const SettingsScreen(),
-  ];
-
-  final List<String> _screenTitles = [
-    'CampusGPT',
-    'Saved Chats',
-    'COMSATS Plus',
-    'FAQs',
-    'Settings',
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      drawer: _buildDrawer(context),
-      body: StarryBackground(child: _screens[_selectedIndex]),
-      appBar: AppBar(
-        title: Text(_screenTitles[_selectedIndex]),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                ),
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => Scaffold(
-                        extendBody: true,
-                        appBar: AppBar(
-                          title: const Text('Notifications'),
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                        ),
-                        body: StarryBackground(
-                          child: NotificationsScreen(
-                            onAllRead: () => notifController.resetCount(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                  notifController.loadUnreadCount();
-                },
-              ),
+    return Obx(() {
+      final List<Widget> _screens = [
+        const ChatScreen(),
+        const SavedChats(),
+        const CGPAcalc(),
+        const FAQsScreen(),
+        if (settingsController.userRole == 'faculty') const SubmitInfoScreen(),
+        const SettingsScreen(),
+      ];
 
-              // ← Obx replaces setState here
-              Obx(
-                () => notifController.unreadCount.value > 0
-                    ? Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
+      final List<String> _screenTitles = [
+        'CampusGPT',
+        'Saved Chats',
+        'COMSATS Plus',
+        'FAQs',
+        'Submit Information',
+        'Settings',
+      ];
+
+      return Scaffold(
+        extendBody: true,
+        drawer: _buildDrawer(context),
+        body: StarryBackground(child: _screens[_selectedIndex]),
+        appBar: AppBar(
+          title: Text(_screenTitles[_selectedIndex]),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          actions: [
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                  ),
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Scaffold(
+                          extendBody: true,
+                          appBar: AppBar(
+                            title: const Text('Notifications'),
+                            elevation: 0,
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
                           ),
-                          child: Text(
-                            notifController.unreadCount.value > 99
-                                ? '99+'
-                                : '${notifController.unreadCount.value}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                          body: StarryBackground(
+                            child: NotificationsScreen(
+                              onAllRead: () => notifController.resetCount(),
                             ),
                           ),
                         ),
-                      )
-                    : const SizedBox(),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+                      ),
+                    );
+                    notifController.loadUnreadCount();
+                  },
+                ),
+
+                // ← Obx replaces setState here
+                Obx(
+                  () => notifController.unreadCount.value > 0
+                      ? Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              notifController.unreadCount.value > 99
+                                  ? '99+'
+                                  : '${notifController.unreadCount.value}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Drawer _buildDrawer(BuildContext context) {
@@ -181,10 +186,21 @@ class _MainScreenState extends State<MainScreen> {
             index: 3,
             context: context,
           ),
+          // in _buildDrawer(), add after FAQs item
+          Obx(
+            () => settingsController.userRole.value == 'faculty'
+                ? _buildDrawerItem(
+                    icon: Icons.upload_file_outlined,
+                    title: 'Submit Information',
+                    index: 4,
+                    context: context,
+                  )
+                : const SizedBox(),
+          ),
           _buildDrawerItem(
             icon: Icons.settings,
             title: 'Settings',
-            index: 4,
+            index: 5,
             context: context,
           ),
           const Divider(color: Colors.white10),

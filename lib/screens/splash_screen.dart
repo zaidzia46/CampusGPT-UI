@@ -95,7 +95,17 @@ class SplashScreenState extends State<SplashScreen> {
                     colors: [const Color(0xFF7C3AED), const Color(0xFF06B6D4)],
                   ),
                 ),
-                child: Lottie.asset('assets/animation/splash_anim.json'),
+                child: Lottie.asset(
+                  'assets/animation/splash_anim.json',
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF06B6D4),
+                      ),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 24),
               Text(
