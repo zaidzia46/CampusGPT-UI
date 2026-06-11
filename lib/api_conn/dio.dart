@@ -4,15 +4,17 @@ import 'package:demo_chatbot/screens/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../controllers/settings_controller.dart';
 
 class APIClient {
   static final FlutterSecureStorage storage = const FlutterSecureStorage();
+  static final String baseUrl = dotenv.env['API_URL'] ?? '';
   static final Dio dio =
       Dio(
           BaseOptions(
-            baseUrl: 'http://192.168.100.12:8000',
+            baseUrl: baseUrl,
             headers: {'Content-Type': 'application/json'},
           ),
         )
@@ -58,7 +60,7 @@ class APIClient {
     final refresh_token = await storage.read(key: 'refresh_token');
     try {
       final response = await Dio().post(
-        'http://192.168.100.12:8000/refresh',
+        '$baseUrl/refresh',
         data: jsonEncode(refresh_token),
       );
 

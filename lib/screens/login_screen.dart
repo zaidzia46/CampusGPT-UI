@@ -480,10 +480,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     SizedBox(height: 40),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (otpController.text.isNotEmpty) {
-                          verify_otp();
-                          Get.back();
+                          final isVerified = await verify_otp();
+                          if (isVerified && context.mounted) {
+                            Navigator.of(context).pop();
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -541,7 +543,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  Future<void> verify_otp() async {
+  Future<bool> verify_otp() async {
     try {
       final response = await APIClient.dio.post(
         '/auth/verify-otp',
@@ -555,10 +557,12 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.greenAccent.withOpacity(0.8),
         colorText: Colors.white,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       register_client(context);
+      return true;
     } on DioException catch (e) {
       final error = e.response?.data['detail'];
+      otpController.clear();
       Get.snackbar(
         'Error',
         error,
@@ -567,6 +571,7 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.redAccent.withOpacity(0.8),
         colorText: Colors.white,
       );
+      return false;
     }
   }
 
