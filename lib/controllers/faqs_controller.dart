@@ -36,7 +36,7 @@ class FAQsController extends GetxController {
       FAQ(
         question: 'Does the app store my previous questions?',
         answer:
-            'Currently, the app does not display previous questions. Future updates may include a query history feature.',
+            'Yes, you can save your specific chats by enabling the save option under chat.',
       ),
       FAQ(
         question: 'Do I need internet to use the app?',
