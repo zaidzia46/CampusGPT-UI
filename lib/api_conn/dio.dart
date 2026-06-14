@@ -22,9 +22,9 @@ class APIClient {
           InterceptorsWrapper(
             onRequest: (options, handler) async {
               final accesstoken = await storage.read(key: 'access_token');
-              if (accesstoken != null ||
-                  !options.path.contains('login') ||
-                  !options.path.contains('register') ||
+              if (accesstoken != null &&
+                  !options.path.contains('login') &&
+                  !options.path.contains('register') &&
                   !options.path.contains('forgot-password')) {
                 options.headers['Authorization'] = 'Bearer $accesstoken';
               }

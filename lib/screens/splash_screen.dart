@@ -24,7 +24,6 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _clearHistory();
     wheretogo();
   }
 
@@ -56,6 +55,7 @@ class SplashScreenState extends State<SplashScreen> {
               Get.offAll(() => const LoginScreen());
             });
           } else {
+            await _clearHistory();
             print(
               'true _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-',
             );
