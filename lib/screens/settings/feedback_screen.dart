@@ -2,6 +2,7 @@ import 'package:demo_chatbot/api_conn/dio.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../conn_check/conn_check.dart';
 import '../../controllers/feedback_controller.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -16,6 +17,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController feedbackTextController = TextEditingController();
 
   Future<void> sendFeedback() async {
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.post(
         '/student/feedback',
@@ -24,6 +27,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           'rating': feedbackController.rating.value,
         },
       );
+      feedbackController.isLoadingButton.value = false;
       if (response.data['message'] == 'success') {
         Get.snackbar(
           'Success',
@@ -39,7 +43,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           'Please try later',
           duration: Duration(seconds: 2),
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.greenAccent.withOpacity(0.8),
+          backgroundColor: Colors.redAccent.withOpacity(0.8),
           colorText: Colors.white,
         );
       }
@@ -128,16 +132,30 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 () => SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF06B6D4),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      fixedSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     onPressed: feedbackController.rating.value != 0
                         ? () {
+                            feedbackController.isLoadingButton.value = true;
                             sendFeedback();
                             Get.back();
                           }
                         : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF06B6D4),
-                    ),
-                    child: const Text('Submit Feedback'),
+                    child: feedbackController.isLoadingButton.value
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Submit Feedback'),
                   ),
                 ),
               ),

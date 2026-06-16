@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo_chatbot/api_conn/dio.dart';
 
+import '../conn_check/conn_check.dart';
 import '../controllers/submissions_controller.dart';
 
 class SubmitInfoScreen extends StatefulWidget {
@@ -28,6 +29,8 @@ class _SubmitInfoScreenState extends State<SubmitInfoScreen> {
 
   Future<void> _submit() async {
     setState(() => _loading = true);
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       await APIClient.dio.post(
         '/student/faculty/submit',
@@ -137,7 +140,10 @@ class _SubmitInfoScreenState extends State<SubmitInfoScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => submissionsController.loadMySubmissions(),
+                    onTap: () {
+                      checkInternetConnection();
+                      submissionsController.loadMySubmissions();
+                    },
                     child: const Icon(
                       Icons.refresh,
                       color: Color(0xFF06B6D4),

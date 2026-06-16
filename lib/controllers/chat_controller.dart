@@ -1,8 +1,9 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:demo_chatbot/api_conn/dio.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../conn_check/conn_check.dart';
 
 class ChatMessage {
   final String text;
@@ -42,32 +43,10 @@ class ChatController extends GetxController {
     );
   }
 
-  Future<bool> checkInternet() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult.contains(ConnectivityResult.mobile) ||
-        connectivityResult.contains(ConnectivityResult.wifi)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   Future<void> sendMessage(String text) async {
     messages.add(ChatMessage(text: text, isUser: true));
-
-    // 1. Check internet first
-    bool hasInternet = await checkInternet();
-    if (!hasInternet) {
-      Get.snackbar(
-        "No Internet",
-        "Please check your internet connection",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
-      );
-      return;
-    }
-
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     // 2. Add loader message immediately
     final loaderMessage = ChatMessage(text: '', isUser: false, isLoading: true);
     messages.add(loaderMessage);

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../api_conn/dio.dart';
+import '../../conn_check/conn_check.dart';
+import '../../controllers/reset_controller.dart';
 
 class UpdatePwd extends StatefulWidget {
   const UpdatePwd({super.key});
@@ -18,12 +20,15 @@ class _UpdatePwdState extends State<UpdatePwd> {
   final TextEditingController oldPwdController = TextEditingController();
   final TextEditingController newPwdController = TextEditingController();
   final TextEditingController conNewPwdController = TextEditingController();
+  final ResetController resetController = ResetController();
 
   bool obscureOld = true;
   bool obscureNew = true;
   bool obscureConfirm = true;
 
   Future<void> UpdatePwd() async {
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.post(
         '/student/update-password',
@@ -33,6 +38,7 @@ class _UpdatePwdState extends State<UpdatePwd> {
           'confirm_password': conNewPwdController.text,
         },
       );
+      resetController.isLoadingButton.value = false;
       Get.snackbar(
         'Update Password',
         response.data['message'],
@@ -190,21 +196,33 @@ class _UpdatePwdState extends State<UpdatePwd> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF06B6D4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Obx(
+                    () => ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF06B6D4),
+                        fixedSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        UpdatePwd();
-                      }
-                    },
-                    child: const Text(
-                      "Update Password",
-                      style: TextStyle(fontSize: 16),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          resetController.isLoadingButton.value = true;
+                          UpdatePwd();
+                        }
+                      },
+                      child: resetController.isLoadingButton.value
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              "Update Password",
+                              style: TextStyle(fontSize: 16),
+                            ),
                     ),
                   ),
                 ),

@@ -3,6 +3,7 @@ import 'package:demo_chatbot/screens/main_screen.dart';
 import 'package:demo_chatbot/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../conn_check/conn_check.dart';
 import '../widgets/starry_background.dart';
 import 'onboarding_screen.dart';
 import 'package:lottie/lottie.dart';
@@ -24,7 +25,13 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _init();
     wheretogo();
+  }
+
+  Future<void> _init() async {
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
   }
 
   Future<void> _clearHistory() async {
@@ -35,7 +42,6 @@ class SplashScreenState extends State<SplashScreen> {
     var prefs = await SharedPreferences.getInstance();
     var onBoard = prefs.getBool(ONBOARDKEY);
     var login = prefs.getBool(KEYLOGIN);
-    print('before _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-');
 
     if (onBoard != null) {
       if (!onBoard) {
@@ -44,30 +50,18 @@ class SplashScreenState extends State<SplashScreen> {
         });
       } else {
         if (login != null) {
-          print(
-            'not null _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-',
-          );
           if (!login) {
-            print(
-              'false _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-',
-            );
             Future.delayed(const Duration(seconds: 3), () {
               Get.offAll(() => const LoginScreen());
             });
           } else {
             await _clearHistory();
-            print(
-              'true _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-',
-            );
             Future.delayed(const Duration(seconds: 3), () async {
               await Get.put(SettingsController()).loadUserRole();
               Get.offAll(() => const MainScreen());
             });
           }
         } else {
-          print(
-            'false _-_-_-_-_-_-_-_-_-_-_-_-$login _-_-_-_-_-_-_-_-_-_-_-_-',
-          );
           Future.delayed(const Duration(seconds: 3), () {
             Get.offAll(() => const LoginScreen());
           });

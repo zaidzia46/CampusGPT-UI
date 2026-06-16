@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../conn_check/conn_check.dart';
+
 class NotificationsScreen extends StatefulWidget {
   final VoidCallback? onAllRead;
   const NotificationsScreen({Key? key, this.onAllRead}) : super(key: key);
@@ -23,6 +25,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final data = await APIClient.getNotifications();
       setState(() => _notifications = data);

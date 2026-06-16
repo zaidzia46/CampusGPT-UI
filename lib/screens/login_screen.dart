@@ -2,11 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api_conn/dio.dart';
+import '../conn_check/conn_check.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/starry_background.dart';
 import 'main_screen.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -23,29 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController otpController = TextEditingController();
   bool _obscurePassword = true;
 
-  Future<bool> checkInternet() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-
-    if (connectivityResult.contains(ConnectivityResult.mobile) ||
-        connectivityResult.contains(ConnectivityResult.wifi)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   Future<void> login_client(BuildContext context) async {
-    bool hasInternet = await checkInternet();
-    if (!hasInternet) {
-      Get.snackbar(
-        "No Internet",
-        "Please check your internet connection",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
-      );
-      return;
-    }
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.post(
         '/auth/login',
@@ -60,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await APIClient.storage.write(key: 'access_token', value: accessToken);
       await APIClient.storage.write(key: 'refresh_token', value: refreshToken);
-          await Get.put(SettingsController()).loadUserRole();
+      await Get.put(SettingsController()).loadUserRole();
       authController.login(
         emailController.text.trim(),
         passwordController.text.trim(),
@@ -103,6 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> reset_pwd(BuildContext context) async {
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.post(
         '/auth/forgot-password',
@@ -432,17 +414,8 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> send_otp() async {
-    bool hasInternet = await checkInternet();
-    if (!hasInternet) {
-      Get.snackbar(
-        "No Internet",
-        "Please check your internet connection",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
-      );
-      return;
-    }
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.post(
         '/auth/send-otp',
@@ -571,17 +544,6 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.redAccent.withOpacity(0.8),
         colorText: Colors.white,
       );
-      return false;
-    }
-  }
-
-  Future<bool> checkInternet() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-
-    if (connectivityResult.contains(ConnectivityResult.mobile) ||
-        connectivityResult.contains(ConnectivityResult.wifi)) {
-      return true;
-    } else {
       return false;
     }
   }

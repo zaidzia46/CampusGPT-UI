@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../conn_check/conn_check.dart';
+
 class SavedChats extends StatefulWidget {
   const SavedChats({super.key});
 
@@ -22,6 +24,8 @@ class _SavedChatsState extends State<SavedChats> {
   }
 
   Future<void> fetchSavedChats() async {
+    bool hasInternet = await checkInternetConnection();
+    if (!hasInternet) return;
     try {
       final response = await APIClient.dio.get('/student/saved-chats');
       setState(() {
